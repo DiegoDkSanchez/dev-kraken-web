@@ -168,6 +168,10 @@ a {
   align-items: center;
 }
 
+.privacy-hero {
+  padding: 148px 0 72px;
+}
+
 .hero-grid {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
@@ -179,6 +183,11 @@ a {
 
 .hero-copy {
   max-width: 680px;
+}
+
+.privacy-shell {
+  width: min(920px, calc(100% - 32px));
+  margin: 0 auto;
 }
 
 .eyebrow {
@@ -215,6 +224,17 @@ h1 {
   color: var(--white-muted);
   font-size: clamp(1.03rem, 1.8vw, 1.24rem);
   line-height: 1.78;
+}
+
+.privacy-hero .hero-text {
+  max-width: 760px;
+}
+
+.privacy-updated {
+  margin: 0;
+  color: var(--white-muted);
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .hero-actions {
@@ -406,8 +426,49 @@ h1 {
 .philosophy,
 .services,
 .manifesto,
+.privacy-content,
 .footer {
   padding: 104px 0;
+}
+
+.privacy-content .privacy-shell {
+  display: grid;
+  gap: 30px;
+}
+
+.policy-block {
+  border-bottom: 1px solid var(--slate-soft);
+  padding-bottom: 30px;
+}
+
+.policy-block:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.policy-block h2 {
+  margin-bottom: 14px;
+  font-size: clamp(1.45rem, 3vw, 2.2rem);
+  line-height: 1.15;
+}
+
+.policy-block p {
+  margin-bottom: 14px;
+  color: var(--slate);
+  line-height: 1.8;
+}
+
+.policy-block p:last-child {
+  margin-bottom: 0;
+}
+
+.policy-block a {
+  color: var(--deep-navy);
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 255, 255, 0.7);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 .section-heading {
@@ -690,6 +751,7 @@ h1 {
   .philosophy,
   .services,
   .manifesto,
+  .privacy-content,
   .footer {
     padding: 72px 0;
   }
