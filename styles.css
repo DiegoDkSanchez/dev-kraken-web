@@ -554,6 +554,11 @@ h1 {
   gap: 18px;
 }
 
+.philosophy .bento-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
 .bento-card,
 .service-card {
   border: 1px solid var(--slate-soft);
@@ -568,6 +573,15 @@ h1 {
   justify-content: flex-end;
   background: #ffffff;
   box-shadow: 0 18px 50px rgba(1, 31, 75, 0.08);
+}
+
+.philosophy .bento-card {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 64px minmax(180px, 0.36fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  padding: 24px 30px;
 }
 
 .bento-card.featured {
@@ -589,6 +603,10 @@ h1 {
   font-weight: 800;
 }
 
+.philosophy .card-icon {
+  margin-bottom: 0;
+}
+
 .featured .card-icon {
   color: var(--cyan);
   background: rgba(0, 255, 255, 0.08);
@@ -598,6 +616,10 @@ h1 {
 .service-card h3 {
   margin-bottom: 14px;
   font-size: 1.34rem;
+}
+
+.philosophy .bento-card h3 {
+  margin-bottom: 0;
 }
 
 .bento-card p,
@@ -743,6 +765,16 @@ h1 {
     min-height: 250px;
   }
 
+  .philosophy .bento-card {
+    min-height: 0;
+    grid-template-columns: 56px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .philosophy .bento-card p {
+    grid-column: 2;
+  }
+
   .footer-grid {
     align-items: start;
   }
@@ -794,6 +826,14 @@ h1 {
   .preview-sidebar,
   .flow-panel {
     padding: 18px;
+  }
+
+  .philosophy .bento-card {
+    grid-template-columns: 1fr;
+  }
+
+  .philosophy .bento-card p {
+    grid-column: auto;
   }
 
   .flow-map {
