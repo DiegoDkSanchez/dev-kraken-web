@@ -63,15 +63,12 @@ a {
 }
 
 .brand-mark {
-  width: 64px;
-  height: 42px;
+  width: 74px;
+  height: 52px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(0, 255, 255, 0.42);
   border-radius: 10px;
   padding: 5px;
-  background: rgba(245, 245, 245, 0.94);
-  box-shadow: var(--shadow-cyan);
 }
 
 .brand-mark img {
