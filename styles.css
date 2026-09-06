@@ -408,16 +408,72 @@ main:focus {
   max-width: 58ch;
 }
 .manifesto {
-  padding-block: var(--space-16);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: var(--space-24) clamp(24px, 6vw, 96px);
 }
 .manifesto p {
-  max-width: 32ch;
-  margin-left: max(var(--gutter), calc((100% - var(--page-width)) / 2));
-  font-size: var(--type-heading);
-  line-height: 1.3;
-  letter-spacing: -0.035em;
+  width: 100%;
+  max-width: 1760px;
+  margin-inline: auto;
+  font-size: clamp(3.5rem, 6.75vw, 9rem);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
   font-weight: 600;
   text-wrap: balance;
+}
+
+/* Temporary visual lines preserve the paragraph's natural, font-aware wrapping. */
+.manifesto.is-prepared {
+  --manifesto-rise: 20px;
+  --manifesto-stagger: 80ms;
+}
+.manifesto .manifesto-readable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.manifesto-line {
+  display: block;
+  overflow: hidden;
+}
+.manifesto-line > span {
+  display: block;
+  white-space: pre;
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(var(--manifesto-rise));
+  opacity: 0.35;
+}
+.manifesto.is-revealing .manifesto-line > span {
+  animation: manifestoLineIn 720ms var(--ease-out) both;
+  animation-delay: calc(var(--line-index) * var(--manifesto-stagger));
+}
+@keyframes manifestoLineIn {
+  to {
+    clip-path: inset(0);
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@media (max-width: 760px) {
+  .manifesto.is-prepared {
+    --manifesto-rise: 12px;
+    --manifesto-stagger: 60ms;
+  }
+}
+@media print, (prefers-reduced-motion: reduce) {
+  .manifesto .manifesto-line > span {
+    animation: none;
+    clip-path: none;
+    transform: none;
+    opacity: 1;
+    white-space: normal;
+  }
 }
 .footer {
   padding-block: var(--space-16) var(--space-8);
@@ -628,7 +684,10 @@ main:focus {
     max-width: none;
   }
   .manifesto {
-    padding-block: var(--space-12);
+    padding-block: var(--space-16);
+  }
+  .manifesto p {
+    font-size: clamp(2.75rem, 11vw, 4.5rem);
   }
   .footer {
     padding-block: var(--space-12) var(--space-6);
@@ -703,4 +762,99 @@ main:focus {
   .hero, .privacy-hero {
     padding-top: var(--space-8);
   }
+}
+
+/* Consultation overlay */
+body.modal-open { overflow: hidden; }
+.consultation-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: var(--space-8);
+}
+.consultation-modal[hidden] { display: none; }
+.consultation-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(1, 13, 35, 0.84);
+  backdrop-filter: blur(8px);
+}
+.consultation-panel {
+  position: relative;
+  width: min(820px, 100%);
+  max-height: min(860px, calc(100vh - var(--space-8) * 2));
+  overflow-y: auto;
+  padding: clamp(var(--space-8), 5vw, var(--space-16));
+  color: var(--deep-navy);
+  background: var(--off-white);
+  border: 1px solid rgba(0, 255, 255, 0.35);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+  animation: modalIn 320ms var(--ease-out) both;
+}
+.consultation-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 44px;
+  height: 44px;
+  border: 0;
+  color: var(--slate);
+  background: transparent;
+  font: 400 2rem/1 Arial, sans-serif;
+  cursor: pointer;
+}
+.consultation-close:hover { color: var(--deep-navy); }
+.consultation-header { max-width: 620px; padding-right: var(--space-12); }
+.consultation-progress { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-12); color: var(--slate); font-size: var(--type-label); font-weight: 600; text-transform: uppercase; letter-spacing: .1em; }
+.progress-track { width: 120px; height: 3px; background: rgba(1, 31, 75, .14); }
+.progress-track span { display: block; width: 33.333%; height: 100%; background: var(--cyan); transition: width 300ms var(--ease-out); }
+.consultation-header .eyebrow { margin-bottom: var(--space-3); }
+.consultation-header h2 { max-width: 18ch; margin-bottom: var(--space-4); font-size: clamp(2rem, 4vw, 3rem); }
+.consultation-header > p:last-child { max-width: 48ch; color: var(--slate); }
+.consultation-form { margin-top: var(--space-12); }
+.consultation-step { animation: stepIn 300ms var(--ease-out) both; }
+.consultation-step[hidden], .consultation-confirmation[hidden] { display: none; }
+.option-list { display: grid; gap: var(--space-3); }
+.consultation-option { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); padding: var(--space-6); border: 1px solid rgba(1, 31, 75, .2); border-radius: 4px; color: var(--deep-navy); background: transparent; text-align: left; cursor: pointer; transition: border-color var(--motion-ui) ease-out, background-color var(--motion-ui) ease-out, transform var(--motion-ui) ease-out; }
+.consultation-option:hover, .consultation-option:focus-visible { border-color: var(--deep-navy); background: #fff; transform: translateX(4px); }
+.consultation-option:disabled { opacity: .42; cursor: not-allowed; transform: none; }
+.consultation-option:focus-visible, .consultation-close:focus-visible, .step-back:focus-visible, .contact-fields input:focus-visible, .contact-fields textarea:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+.consultation-option strong { display: block; font-size: 1rem; line-height: 1.4; }
+.consultation-option small { display: block; max-width: 58ch; margin-top: var(--space-2); color: var(--slate); font: inherit; font-size: var(--type-support); line-height: 1.6; }
+.option-arrow { flex: 0 0 auto; color: var(--slate); font-size: 1.3rem; }
+.option-list-existing { grid-template-columns: repeat(2, 1fr); }
+.option-list-existing .consultation-option { min-height: 88px; }
+.step-back { display: inline-flex; min-height: 44px; margin-top: var(--space-6); padding: 0; border: 0; color: var(--slate); background: transparent; font: inherit; font-size: var(--type-support); cursor: pointer; }
+.step-back:hover { color: var(--deep-navy); }
+.contact-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6); }
+.contact-fields label { display: grid; gap: var(--space-2); color: var(--deep-navy); font-size: var(--type-support); font-weight: 600; }
+.contact-fields .field-wide { grid-column: 1 / -1; }
+.contact-fields input, .contact-fields textarea { width: 100%; min-height: 50px; border: 1px solid rgba(1, 31, 75, .24); border-radius: 4px; padding: var(--space-3) var(--space-4); color: var(--deep-navy); background: #fff; font: inherit; font-size: var(--type-support); resize: vertical; }
+.contact-fields textarea { min-height: 120px; }
+.contact-fields input::placeholder, .contact-fields textarea::placeholder { color: #82909a; }
+.form-error { margin-top: var(--space-4); color: #9d2b2b; font-size: var(--type-support); }
+.consultation-submit { min-width: 220px; margin-top: var(--space-8); }
+.reassurance { max-width: 52ch; margin-top: var(--space-4); color: var(--slate); font-size: var(--type-label); line-height: 1.6; }
+.consultation-confirmation { max-width: 520px; animation: stepIn 300ms var(--ease-out) both; }
+.confirmation-mark { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: var(--space-6); border: 1px solid var(--cyan); color: var(--deep-navy); background: rgba(0, 255, 255, .35); font-weight: 700; }
+.consultation-confirmation h3 { margin-bottom: var(--space-4); font-size: clamp(1.6rem, 3vw, 2.2rem); }
+.consultation-confirmation > p:not(.confirmation-mark) { margin-bottom: var(--space-8); color: var(--slate); }
+@keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes stepIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+@media (max-width: 760px) {
+  .consultation-modal { padding: 0; align-items: stretch; }
+  .consultation-panel { max-height: 100vh; padding: var(--space-12) var(--gutter) var(--space-8); }
+  .consultation-header { padding-right: var(--space-8); }
+  .consultation-progress { margin-bottom: var(--space-8); }
+  .consultation-form { margin-top: var(--space-8); }
+  .option-list-existing, .contact-fields { grid-template-columns: 1fr; }
+  .contact-fields .field-wide { grid-column: auto; }
+  .consultation-option { padding: var(--space-4); }
+  .consultation-submit { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .consultation-panel, .consultation-step, .consultation-confirmation { animation: none; }
+  .progress-track span { transition: none; }
 }

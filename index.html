@@ -30,7 +30,7 @@
           <a href="#casos">Casos</a>
           <a href="#contacto">Contacto</a>
         </div>
-        <a class="btn btn-primary nav-cta" href="#contacto">Agendar Consultoría</a>
+        <a class="btn btn-primary nav-cta" href="#contacto" data-consultation-trigger>Agendar Consultoría</a>
       </nav>
     </header>
 
@@ -45,7 +45,7 @@
               Ingeniería precisa, interfaces claras y decisiones de producto que reducen ruido.
             </p>
             <div class="hero-actions" aria-label="Acciones principales">
-              <a class="btn btn-primary" href="#contacto">Agendar Consultoría</a>
+              <a class="btn btn-primary" href="#contacto" data-consultation-trigger>Agendar Consultoría</a>
               <a class="btn btn-secondary" href="#servicios">Ver servicios</a>
             </div>
           </div>
@@ -137,7 +137,7 @@
       </section>
 
       <section class="manifesto section-light">
-        <p data-reveal>No creamos software para las máquinas; lo diseñamos para las personas.</p>
+        <p data-manifesto>No creamos software para las máquinas; lo diseñamos para las personas.</p>
       </section>
     </main>
 
@@ -159,6 +159,73 @@
         </div>
       </div>
     </footer>
+
+    <div class="consultation-modal" data-consultation-modal hidden>
+      <div class="consultation-backdrop" data-consultation-close></div>
+      <section class="consultation-panel" role="dialog" aria-modal="true" aria-labelledby="consultation-title" aria-describedby="consultation-subtitle">
+        <button class="consultation-close" type="button" aria-label="Cerrar formulario" data-consultation-close>×</button>
+        <div class="consultation-header">
+          <div class="consultation-progress" aria-label="Progreso del formulario">
+            <span class="progress-label" data-progress-label>1 de 3</span>
+            <span class="progress-track"><span data-progress-bar></span></span>
+          </div>
+          <p class="eyebrow dark" data-step-kicker>Comencemos por el contexto</p>
+          <h2 id="consultation-title" data-step-title>¿Qué necesitas construir o mejorar?</h2>
+          <p id="consultation-subtitle" data-step-subtitle>Cuéntame brevemente en qué etapa estás.</p>
+        </div>
+
+        <form class="consultation-form" data-consultation-form novalidate>
+          <div class="consultation-step is-active" data-step="1">
+            <div class="option-list option-list-primary" role="group" aria-label="Necesidad principal">
+              <button type="button" class="consultation-option" data-service-need="build">
+                <span><strong>Quiero crear una aplicación</strong><small>Tengo una idea y quiero convertirla en una aplicación móvil o web.</small></span>
+                <span class="option-arrow" aria-hidden="true">↗</span>
+              </button>
+              <button type="button" class="consultation-option" data-service-need="unsure">
+                <span><strong>No sé exactamente qué construir</strong><small>Tengo una necesidad o una idea de negocio, pero necesito ayuda para definir la mejor solución.</small></span>
+                <span class="option-arrow" aria-hidden="true">↗</span>
+              </button>
+              <button type="button" class="consultation-option" data-service-need="fix">
+                <span><strong>Necesito arreglar o mejorar mi software</strong><small>Ya tengo un producto y necesito corregir problemas, modernizarlo, reconstruirlo o mejorar su arquitectura.</small></span>
+                <span class="option-arrow" aria-hidden="true">↗</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="consultation-step" data-step="2" hidden>
+            <div class="option-list option-list-existing" role="group" aria-label="Producto actual">
+              <button type="button" class="consultation-option" data-existing-product="mobile"><strong>Aplicación móvil</strong></button>
+              <button type="button" class="consultation-option" data-existing-product="web"><strong>Aplicación web</strong></button>
+              <button type="button" class="consultation-option" data-existing-product="mobile-web"><strong>Aplicación móvil y web</strong></button>
+              <button type="button" class="consultation-option" data-existing-product="none"><strong>Todavía no tengo nada</strong></button>
+            </div>
+            <button type="button" class="step-back" data-consultation-back>← Volver</button>
+          </div>
+
+          <div class="consultation-step" data-step="3" hidden>
+            <div class="contact-fields">
+              <label>Nombre <input type="text" name="name" placeholder="Tu nombre" autocomplete="name" /></label>
+              <label>Correo electrónico <input type="email" name="email" placeholder="tu@correo.com" autocomplete="email" required /></label>
+              <label>Número de teléfono <input type="tel" name="phone" placeholder="+503 0000 0000" autocomplete="tel" /></label>
+              <label class="field-wide">¿Hay algo más que debería saber?
+                <textarea name="details" rows="4" placeholder="Cuéntame brevemente sobre tu idea, el problema que quieres resolver o qué está fallando actualmente."></textarea>
+              </label>
+            </div>
+            <p class="form-error" role="alert" data-form-error hidden>Revisa tu correo electrónico para continuar.</p>
+            <button class="btn btn-primary consultation-submit" type="submit"><span data-submit-label>Agendar mi consultoría</span><span data-submit-loading hidden>Enviando…</span></button>
+            <p class="reassurance">Sin compromiso. Primero revisaremos tu proyecto y definiremos cuál es la mejor forma de ayudarte.</p>
+            <button type="button" class="step-back" data-consultation-back>← Volver</button>
+          </div>
+
+          <div class="consultation-confirmation" data-confirmation hidden>
+            <p class="confirmation-mark" aria-hidden="true">✓</p>
+            <h3>Gracias. Revisaré tu proyecto.</h3>
+            <p>Recibí tu información y me pondré en contacto contigo para conocer mejor lo que necesitas.</p>
+            <button class="btn btn-primary" type="button" data-consultation-close>Cerrar</button>
+          </div>
+        </form>
+      </section>
+    </div>
 
     <script src="script.js"></script>
   </body>
