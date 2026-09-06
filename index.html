@@ -11,12 +11,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#top">Saltar al contenido</a>
     <header class="site-header" data-header>
       <nav class="navbar" aria-label="Principal">
         <a class="brand" href="index.html#top" aria-label="Dev Kraken inicio">
@@ -29,30 +30,30 @@
           <a href="#casos">Casos</a>
           <a href="#contacto">Contacto</a>
         </div>
-        <a class="btn btn-primary nav-cta" href="#contacto">Agendar Consultoria</a>
+        <a class="btn btn-primary nav-cta" href="#contacto">Agendar Consultoría</a>
       </nav>
     </header>
 
-    <main id="top">
+    <main id="top" tabindex="-1">
       <section class="hero section-dark">
         <div class="hero-grid">
           <div class="hero-copy">
+            <p class="eyebrow">Clean Code. Brilliant UX.</p>
             <h1>Domando la complejidad digital</h1>
             <p class="hero-text">
               Transformamos plataformas complejas en flujos limpios, intuitivos y listos para escalar.
-              Ingenieria precisa, interfaces claras y decisiones de producto que reducen ruido.
+              Ingeniería precisa, interfaces claras y decisiones de producto que reducen ruido.
             </p>
             <div class="hero-actions" aria-label="Acciones principales">
-              <a class="btn btn-primary" href="#contacto">Agendar Consultoria</a>
+              <a class="btn btn-primary" href="#contacto">Agendar Consultoría</a>
               <a class="btn btn-secondary" href="#servicios">Ver servicios</a>
             </div>
           </div>
 
-          <div class="product-preview" aria-label="Mockup abstracto de interfaz de software">
+          <div class="product-preview" role="img" aria-label="Vista conceptual de una interfaz de software con un flujo simplificado">
             <div class="preview-topbar">
-              <span></span>
-              <span></span>
-              <span></span>
+              <span class="preview-title">Dev Kraken / System overview</span>
+              <span class="preview-caption">Vista conceptual</span>
             </div>
             <div class="preview-body">
               <aside class="preview-sidebar">
@@ -70,13 +71,12 @@
                   <span class="status-pill">Live</span>
                 </div>
                 <div class="flow-map">
-                  <span class="node node-a"></span>
-                  <span class="node node-b"></span>
-                  <span class="node node-c"></span>
-                  <span class="node node-d"></span>
-                  <span class="connector connector-a"></span>
-                  <span class="connector connector-b"></span>
-                  <span class="connector connector-c"></span>
+                  <svg viewBox="0 0 320 200" aria-hidden="true" focusable="false">
+                    <path class="flow-line" d="M40 48H120V100H200M40 152H120V100M200 100H264V48H288M200 100H264V152H288" />
+                    <g class="flow-node"><circle cx="40" cy="48" r="6" /><circle cx="40" cy="152" r="6" /><circle cx="288" cy="48" r="6" /><circle cx="288" cy="152" r="6" /></g>
+                    <rect class="flow-core" x="144" y="76" width="64" height="48" rx="4" />
+                    <text x="176" y="105" text-anchor="middle">UX</text>
+                  </svg>
                 </div>
                 <div class="timeline">
                   <span></span>
@@ -90,51 +90,54 @@
       </section>
 
       <section class="section-light philosophy" id="enfoque">
-        <div class="section-heading">
-          <p class="eyebrow dark">Nuestra filosofia</p>
-          <h2>Orden visual para decisiones tecnicas complejas.</h2>
-        </div>
-        <div class="bento-grid">
-          <article class="bento-card">
-            <span class="card-icon">01</span>
-            <h3>Arquitectura Limpia</h3>
-            <p>Codigo robusto, mantenible y preparado para cambios reales sin romper la experiencia.</p>
-          </article>
-          <article class="bento-card featured">
-            <span class="card-icon">02</span>
-            <h3>Diseno Centrado en el Usuario</h3>
-            <p>Interfaces que eliminan friccion, reducen pasos y convierten operaciones complejas en flujos claros.</p>
-          </article>
-          <article class="bento-card">
-            <span class="card-icon">03</span>
-            <h3>Escalabilidad</h3>
-            <p>Infraestructura, producto y UX listos para crecer sin deuda visual ni tecnica innecesaria.</p>
-          </article>
+        <div class="philosophy-layout" data-reveal>
+          <div class="section-heading">
+            <p class="eyebrow dark">Nuestra filosofía</p>
+            <h2>Orden visual para decisiones técnicas complejas.</h2>
+          </div>
+          <div class="principles">
+            <article class="principle">
+              <span class="principle-number">01</span>
+              <h3>Arquitectura Limpia</h3>
+              <p>Código robusto, mantenible y preparado para cambios reales sin romper la experiencia.</p>
+            </article>
+            <article class="principle">
+              <span class="principle-number">02</span>
+              <h3>Diseño Centrado en el Usuario</h3>
+              <p>Interfaces que eliminan fricción, reducen pasos y convierten operaciones complejas en flujos claros.</p>
+            </article>
+            <article class="principle">
+              <span class="principle-number">03</span>
+              <h3>Escalabilidad</h3>
+              <p>Infraestructura, producto y UX listos para crecer sin deuda visual ni técnica innecesaria.</p>
+            </article>
+          </div>
         </div>
       </section>
 
       <section class="section-dark services" id="servicios">
-        <div class="section-heading align-left">
-          <h2>Soluciones digitales disenadas para operar con precision.</h2>
+        <div class="section-heading" data-reveal>
+          <p class="eyebrow">Servicios</p>
+          <h2>Soluciones digitales diseñadas para operar con precisión.</h2>
         </div>
-        <div class="service-grid" id="casos">
-          <article class="service-card">
+        <div class="service-list" id="casos" data-reveal>
+          <article class="service-row">
             <h3>Desarrollo Mobile</h3>
-            <p>Apps nativas e hibridas con rendimiento estable, navegacion clara y componentes listos para escalar.</p>
+            <p>Apps nativas e híbridas con rendimiento estable, navegación clara y componentes listos para escalar.</p>
           </article>
-          <article class="service-card">
+          <article class="service-row">
             <h3>Aplicaciones Web a la Medida</h3>
             <p>Dashboards, plataformas SaaS y herramientas internas con arquitectura limpia y experiencia premium.</p>
           </article>
-          <article class="service-card">
-            <h3>Consultoria de Arquitectura y UX</h3>
-            <p>Auditoria de producto, sistemas de diseno y decisiones tecnicas para simplificar productos complejos.</p>
+          <article class="service-row">
+            <h3>Consultoría de Arquitectura y UX</h3>
+            <p>Auditoría de producto, sistemas de diseño y decisiones técnicas para simplificar productos complejos.</p>
           </article>
         </div>
       </section>
 
       <section class="manifesto section-light">
-        <p>No creamos software para las maquinas; lo diseñamos para las personas.</p>
+        <p data-reveal>No creamos software para las máquinas; lo diseñamos para las personas.</p>
       </section>
     </main>
 
@@ -147,13 +150,13 @@
           </a>
           <p>Clean Code. Brilliant UX.</p>
         </div>
+        <a class="btn btn-primary" href="mailto:diegodksanchez@gmail.com">diegodksanchez@gmail.com</a>
         <div class="footer-links">
           <a href="privacy.html">Privacidad</a>
-          <a href="#">Terminos</a>
+          <a href="#">Términos</a>
           <a href="#">LinkedIn</a>
           <a href="#">GitHub</a>
         </div>
-        <a class="btn btn-primary" href="mailto:diegodksanchez@gmail.com">diegodksanchez@gmail.com</a>
       </div>
     </footer>
 
