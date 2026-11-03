@@ -1,3 +1,25 @@
+const catalog = window.DEV_KRAKEN_CATALOG;
+if (catalog) {
+  const servicesContainer = document.querySelector('[data-services]');
+  const demosContainer = document.querySelector('[data-demos]');
+  // Contenido editorial local; no se interpola información enviada por visitantes.
+  if (servicesContainer) servicesContainer.innerHTML = catalog.services.map(service => `
+    <article class="solution-card">
+      <div class="solution-meta"><span>${service.number}</span><span class="service-icon" aria-hidden="true">${service.icon}</span></div>
+      <h3>${service.name}</h3><p>${service.description}</p>
+      <ul>${service.capabilities.slice(0, 3).map(capability => `<li>${capability}</li>`).join('')}</ul>
+      <details><summary>Más capacidades</summary><ul>${service.capabilities.slice(3).map(capability => `<li>${capability}</li>`).join('')}</ul></details>
+      <a class="btn btn-secondary" href="#contacto" data-consultation-trigger data-source="services" data-service="${service.id}">Consultar solución<span class="visually-hidden">: ${service.name}</span> ↗</a>
+    </article>`).join('');
+  if (demosContainer) demosContainer.innerHTML = catalog.demos.map(demo => `
+    <article class="demo-card"><p class="eyebrow">Próximamente · Acceso bajo solicitud</p>
+      <h3>${demo.name}</h3><p>${demo.description}</p>
+      <p class="demo-features-label">Alcance previsto</p><ul>${demo.features.map(feature => `<li>${feature}</li>`).join('')}</ul>
+      <p class="demo-availability">Todavía no disponible. Registra tu interés para solicitar acceso cuando esté habilitada.</p>
+      <a class="btn btn-primary" href="#contacto" data-consultation-trigger data-source="demo" data-demo="${demo.id}">Probar demo<span class="visually-hidden">: ${demo.name}</span> ↗</a>
+    </article>`).join('');
+}
+
 const header = document.querySelector("[data-header]");
 
 if (header) {
@@ -136,100 +158,190 @@ if (revealElements.length && !reducedMotion.matches && "IntersectionObserver" in
   }
 }
 
-const consultationModal = document.querySelector("[data-consultation-modal]");
-const consultationTriggers = document.querySelectorAll("[data-consultation-trigger]");
-
-if (consultationModal && consultationTriggers.length) {
-  const state = { serviceNeed: "", existingProduct: "", name: "", email: "", phone: "", details: "" };
-  const steps = [...consultationModal.querySelectorAll("[data-step]")];
-  const title = consultationModal.querySelector("[data-step-title]");
-  const subtitle = consultationModal.querySelector("[data-step-subtitle]");
-  const kicker = consultationModal.querySelector("[data-step-kicker]");
-  const progressLabel = consultationModal.querySelector("[data-progress-label]");
-  const progressBar = consultationModal.querySelector("[data-progress-bar]");
-  const form = consultationModal.querySelector("[data-consultation-form]");
-  const confirmation = consultationModal.querySelector("[data-confirmation]");
-  const copy = [
-    ["Comencemos por el contexto", "¿Qué necesitas construir o mejorar?", "Cuéntame brevemente en qué etapa estás."],
-    ["Un poco más de contexto", "¿Qué tienes actualmente?", "Esto me ayudará a entender mejor el punto de partida."],
-    ["El siguiente paso", "Hablemos de tu proyecto", "Déjame tus datos y me pondré en contacto contigo para revisar tu caso."]
-  ];
+const consultationModal = document.querySelector('[data-consultation-modal]');
+if (consultationModal && catalog) {
+  const form = consultationModal.querySelector('form');
+  const steps = [...form.querySelectorAll('[data-step]')];
+  const title = consultationModal.querySelector('[data-step-title]');
+  const subtitle = consultationModal.querySelector('[data-step-subtitle]');
+  const error = form.querySelector('[data-form-error]');
+  const confirmation = form.querySelector('[data-confirmation]');
+  const submit = form.querySelector('[type="submit"]');
+  const contact = window.DEV_KRAKEN_CONTACT;
+  const serviceSelect = form.elements.serviceId;
+  const demoSelect = form.elements.demoId;
+  const demoRequested = form.elements.demoRequested;
+  const fallback = form.querySelector('[data-email-fallback]');
+  const background = [...document.querySelectorAll('body > header, body > main, body > footer, body > .skip-link')];
   let currentStep = 1;
-  let closeTimer;
+  let selectedNeed = '';
+  let source = 'contact';
   let lastFocused;
-
-  const showStep = (step) => {
-    currentStep = step;
-    steps.forEach((item) => { item.hidden = Number(item.dataset.step) !== step; });
-    [kicker.textContent, title.textContent, subtitle.textContent] = copy[step - 1];
-    progressLabel.textContent = `${step} de 3`;
-    progressBar.style.width = `${step * 33.333}%`;
-    consultationModal.querySelector(`[data-step="${step}"] button, [data-step="${step}"] input`)?.focus({ preventScroll: true });
+  let sending = false;
+  let controller;
+  let requestGeneration = 0;
+  const copy = [
+    ['Tu desafío empresarial', '¿Qué desafío quieres resolver?', 'Cuéntanos qué necesita mejorar tu empresa para ayudarte a encontrar la solución adecuada.'],
+    ['Información empresarial', 'Conozcamos un poco más de tu empresa.', 'Comparte tus datos y el contexto de tu necesidad.'],
+    ['Confirmación y preferencias', 'Estamos listos para conocer tu proyecto.', 'Revisa tu información antes de enviar la solicitud.']
+  ];
+  const options = form.querySelector('[data-service-options]');
+  options.innerHTML = [...catalog.services].sort((a,b) => ['automation','enterprise-software','integrations','cloud','consulting','support'].indexOf(a.id) - ['automation','enterprise-software','integrations','cloud','consulting','support'].indexOf(b.id)).map(s => `<button type="button" class="consultation-option" data-service-need="${s.id}" aria-pressed="false"><strong>${s.need}</strong><span aria-hidden="true">↗</span></button>`).join('') + '<button type="button" class="consultation-option" data-service-need="demo" aria-pressed="false"><strong>Quiero probar una demostración</strong><span aria-hidden="true">↗</span></button>';
+  serviceSelect.innerHTML = '<option value="">Solo una demostración</option>' + catalog.services.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  demoSelect.innerHTML += catalog.demos.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+  const setError = message => { error.textContent = message; error.hidden = !message; };
+  const syncSelection = () => options.querySelectorAll('button').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.serviceNeed === selectedNeed)));
+  const payload = () => ({
+    fullName: form.elements.fullName.value.trim(), email: form.elements.email.value.trim(),
+    company: form.elements.company.value.trim(), phone: form.elements.phone.value.trim() || null,
+    industry: form.elements.industry.value || null, companySize: form.elements.companySize.value || null,
+    serviceId: serviceSelect.value || 'demo', description: form.elements.description.value.trim() || null,
+    demoRequested: demoRequested.checked, demoId: demoRequested.checked ? demoSelect.value || null : null, source
+  });
+  const syncDemo = () => {
+    form.querySelector('[data-demo-choice]').hidden = !demoRequested.checked;
+    form.querySelector('[data-demo-notice]').hidden = !demoRequested.checked;
+    demoSelect.required = demoRequested.checked;
   };
-  const open = (event) => {
-    event.preventDefault();
-    lastFocused = event.currentTarget;
-    clearTimeout(closeTimer);
-    consultationModal.hidden = false;
-    document.body.classList.add("modal-open");
-    showStep(1);
+  const updateFallback = () => {
+    const data = payload();
+    const service = catalog.services.find(s => s.id === data.serviceId)?.name || 'Demostración';
+    const demo = catalog.demos.find(d => d.id === data.demoId)?.name || 'No solicitada';
+    const body = `Nombre: ${data.fullName}\nCorreo: ${data.email}\nEmpresa: ${data.company}\nTeléfono: ${data.phone || '—'}\nSector: ${data.industry || '—'}\nTamaño: ${data.companySize || '—'}\nServicio: ${service} (${data.serviceId})\nNecesidad: ${data.description || '—'}\nDemo: ${demo}\nOrigen: ${data.source}`;
+    fallback.href = `mailto:diegodksanchez@gmail.com?subject=${encodeURIComponent('Solicitud empresarial — DEV KRAKEN')}&body=${encodeURIComponent(body)}`;
+  };
+  const showStep = step => {
+    currentStep = step;
+    setError('');
+    steps.forEach(item => { item.hidden = Number(item.dataset.step) !== step; });
+    [consultationModal.querySelector('[data-step-kicker]').textContent, title.textContent, subtitle.textContent] = copy[step - 1];
+    consultationModal.querySelector('[data-progress-label]').textContent = `${step} de 3`;
+    consultationModal.querySelector('[data-progress-bar]').style.width = `${step / 3 * 100}%`;
+    if (step === 3) {
+      const data = payload();
+      const summary = form.querySelector('[data-summary]');
+      summary.replaceChildren();
+      for (const [label, value] of [['Solución', catalog.services.find(s => s.id === data.serviceId)?.name || 'Solicitud de demostración'], ['Contacto', `${data.fullName} · ${data.email}`], ['Empresa', data.company], ['Necesidad', data.description || 'Sin descripción adicional']]) {
+        const term = document.createElement('dt'); term.textContent = label;
+        const detail = document.createElement('dd'); detail.textContent = value;
+        summary.append(term, detail);
+      }
+      syncDemo(); updateFallback();
+      form.querySelector('[data-integration-notice]').hidden = Boolean(contact.endpoint);
+      fallback.hidden = Boolean(contact.endpoint);
+      submit.disabled = !contact.endpoint;
+    }
+    title.tabIndex = -1;
+    title.focus({ preventScroll: true });
+    consultationModal.querySelector('.consultation-panel').scrollTop = 0;
+  };
+  const validateBusiness = () => {
+    for (const name of ['fullName','email','company']) {
+      const field = form.elements[name];
+      field.value = field.value.trim();
+    }
+    const invalid = [...steps[1].querySelectorAll('input, select, textarea')].find(field => !field.checkValidity());
+    if (invalid) { showStep(2); invalid.reportValidity(); return false; }
+    if (!serviceSelect.value && !demoRequested.checked) {
+      showStep(2); setError('Selecciona un servicio o solicita una demostración desde el primer paso.'); serviceSelect.focus(); return false;
+    }
+    return true;
+  };
+  const setSending = value => {
+    sending = value;
+    form.setAttribute('aria-busy', String(value));
+    form.querySelector('[data-submit-label]').hidden = value;
+    form.querySelector('[data-submit-loading]').hidden = !value;
+    form.querySelectorAll('button, input, select, textarea').forEach(control => { control.disabled = value; });
+    submit.disabled = value || !contact.endpoint;
+    fallback.hidden = value || Boolean(contact.endpoint);
   };
   const close = () => {
+    requestGeneration++;
+    controller?.abort();
     consultationModal.hidden = true;
-    document.body.classList.remove("modal-open");
-    confirmation.hidden = true;
-    form.querySelectorAll("[data-step]").forEach((item) => { item.hidden = Number(item.dataset.step) !== 1; });
+    document.body.classList.remove('modal-open');
+    background.forEach(element => { element.inert = false; });
+    setSending(false);
     form.reset();
-    Object.keys(state).forEach((key) => { state[key] = ""; });
-    currentStep = 1;
-    showStep(1);
-    consultationModal.querySelectorAll("[data-existing-product]").forEach((option) => { option.disabled = false; });
+    selectedNeed = '';
+    confirmation.hidden = true;
     lastFocused?.focus({ preventScroll: true });
   };
-  consultationTriggers.forEach((trigger) => trigger.addEventListener("click", open));
-  consultationModal.querySelectorAll("[data-consultation-close]").forEach((button) => button.addEventListener("click", close));
-  consultationModal.querySelectorAll("[data-consultation-back]").forEach((button) => button.addEventListener("click", () => showStep(Math.max(1, currentStep - 1))));
-  consultationModal.addEventListener("click", (event) => {
-    const service = event.target.closest("[data-service-need]");
-    const product = event.target.closest("[data-existing-product]");
-    if (service) {
-      state.serviceNeed = service.dataset.serviceNeed;
-      consultationModal.querySelector('[data-existing-product="none"]').disabled = state.serviceNeed === "fix";
-      window.setTimeout(() => showStep(2), 220);
-    }
-    if (product && !(state.serviceNeed === "fix" && product.dataset.existingProduct === "none")) {
-      state.existingProduct = product.dataset.existingProduct;
-      window.setTimeout(() => showStep(3), 220);
-    }
+  document.querySelectorAll('[data-consultation-trigger]').forEach(trigger => trigger.addEventListener('click', event => {
+    event.preventDefault(); lastFocused = trigger;
+    source = trigger.dataset.source || 'contact';
+    selectedNeed = trigger.dataset.demo ? 'demo' : trigger.dataset.service || '';
+    serviceSelect.value = trigger.dataset.service || '';
+    demoRequested.checked = Boolean(trigger.dataset.demo);
+    demoSelect.value = trigger.dataset.demo || '';
+    syncSelection(); syncDemo();
+    consultationModal.hidden = false;
+    document.body.classList.add('modal-open');
+    background.forEach(element => { element.inert = true; });
+    showStep(1);
+  }));
+  consultationModal.querySelectorAll('[data-consultation-close]').forEach(button => button.addEventListener('click', close));
+  options.addEventListener('click', event => {
+    const option = event.target.closest('[data-service-need]');
+    if (!option) return;
+    selectedNeed = option.dataset.serviceNeed;
+    serviceSelect.value = selectedNeed === 'demo' ? '' : selectedNeed;
+    demoRequested.checked = selectedNeed === 'demo';
+    syncSelection(); syncDemo(); setError('');
   });
-  form.addEventListener("input", (event) => { if (event.target.name in state) state[event.target.name] = event.target.value; });
-  form.addEventListener("submit", async (event) => {
+  serviceSelect.addEventListener('change', () => {
+    selectedNeed = serviceSelect.value || 'demo';
+    if (!serviceSelect.value) demoRequested.checked = true;
+    syncSelection(); syncDemo();
+  });
+  form.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => {
+    if (currentStep === 1 && !selectedNeed) { setError('Selecciona el desafío que quieres resolver.'); return; }
+    if (currentStep === 2 && !validateBusiness()) return;
+    showStep(currentStep + 1);
+  }));
+  form.querySelectorAll('[data-consultation-back]').forEach(button => button.addEventListener('click', () => showStep(currentStep - 1)));
+  demoRequested.addEventListener('change', () => { syncDemo(); updateFallback(); });
+  demoSelect.addEventListener('change', updateFallback);
+  fallback.addEventListener('click', event => {
+    if (!validateBusiness() || (demoRequested.checked && !demoSelect.reportValidity())) event.preventDefault();
+    else updateFallback();
+  });
+  form.addEventListener('submit', async event => {
     event.preventDefault();
-    const email = form.elements.email;
-    const error = form.querySelector("[data-form-error]");
-    if (!email.checkValidity()) { error.hidden = false; email.focus(); return; }
-    error.hidden = true;
-    form.querySelector("[data-submit-label]").hidden = true;
-    form.querySelector("[data-submit-loading]").hidden = false;
-    form.querySelector(".consultation-submit").disabled = true;
-    // No contact API exists in this static site yet; this boundary is ready for one.
-    await new Promise((resolve) => window.setTimeout(resolve, 650));
-    form.querySelector("[data-submit-label]").hidden = false;
-    form.querySelector("[data-submit-loading]").hidden = true;
-    form.querySelector(".consultation-submit").disabled = false;
-    steps.forEach((item) => { item.hidden = true; });
-    confirmation.hidden = false;
-    confirmation.querySelector("button")?.focus({ preventScroll: true });
+    if (sending) return;
+    if (currentStep < 3) { form.querySelector(`[data-step="${currentStep}"] [data-next]`).click(); return; }
+    if (!validateBusiness() || (demoRequested.checked && !demoSelect.reportValidity())) return;
+    if (!contact.endpoint) { setError('El envío en línea todavía no está configurado. Usa la opción de correo.'); return; }
+    const data = payload();
+    setError(''); setSending(true);
+    controller = new AbortController();
+    const generation = ++requestGeneration;
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      await contact.submit(data, controller.signal);
+      if (generation !== requestGeneration) return;
+      steps.forEach(step => { step.hidden = true; });
+      confirmation.hidden = false;
+      form.querySelector('[data-access-status]').hidden = !data.demoRequested;
+      title.textContent = 'Solicitud recibida';
+      subtitle.textContent = 'Gracias por compartir las necesidades de tu empresa.';
+      confirmation.focus();
+    } catch {
+      if (generation === requestGeneration) setError('No pudimos enviar tu solicitud. Inténtalo nuevamente.');
+    } finally {
+      clearTimeout(timeout);
+      if (generation === requestGeneration) setSending(false);
+    }
   });
-  document.addEventListener("keydown", (event) => {
+  document.addEventListener('keydown', event => {
     if (consultationModal.hidden) return;
-    if (event.key === "Escape") close();
-    if (event.key === "Tab") {
-      const focusable = [...consultationModal.querySelectorAll("button, input, textarea")].filter((el) => !el.disabled && !el.closest("[hidden]"));
-      if (!focusable.length) return;
-      const first = focusable[0]; const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    if (event.key === 'Escape') close();
+    if (event.key === 'Tab') {
+      const focusable = [...consultationModal.querySelectorAll('button, input, select, textarea, a[href]')].filter(element => !element.disabled && !element.closest('[hidden]'));
+      const first = focusable[0]; const last = focusable.at(-1);
+      if (event.shiftKey && (document.activeElement === first || !focusable.includes(document.activeElement))) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || !focusable.includes(document.activeElement))) { event.preventDefault(); first.focus(); }
     }
   });
 }
